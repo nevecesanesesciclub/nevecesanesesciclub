@@ -385,9 +385,6 @@
         </p>
       </div>
       <form id="contactForm" onsubmit="handleSubmit(event)">
-        <input type="hidden" name="access_key" value="mbdzrkbn"/>
-        <input type="hidden" name="subject" value="Nuova richiesta - Neve &amp; Cesanese Sci Club"/>
-        <input type="hidden" name="from_name" value="Neve &amp; Cesanese Sci Club"/>
         <input type="text" name="name" placeholder="Nome e Cognome" required/>
         <input type="email" name="email" placeholder="La tua Email" required/>
         <input type="tel" name="telefono" placeholder="Numero di Telefono"/>
@@ -399,7 +396,7 @@
           <option>Altro</option>
         </select>
         <textarea name="messaggio" placeholder="Il tuo messaggio..."></textarea>
-        <button type="submit">Invia Richiesta ✉️</button>
+        <button type="button" onclick="handleSubmit()">Invia Richiesta ✉️</button>
       </form>
     </div>
   </div>
@@ -436,32 +433,56 @@
     });
   });
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const btn = e.target.querySelector('button');
-    const data = new FormData(e.target);
+  async function handleSubmit() {
+    const form = document.getElementById('contactForm');
+    const btn = form.querySelector('button');
+
+    const name = form.querySelector('[name="name"]').value.trim();
+    const email = form.querySelector('[name="email"]').value.trim();
+    if (!name || !email) {
+      alert('Per favore compila Nome e Email.');
+      return;
+    }
+
     btn.textContent = '⏳ Invio in corso...';
     btn.disabled = true;
+
+    const data = {
+      name: name,
+      email: email,
+      telefono: form.querySelector('[name="telefono"]').value,
+      motivo: form.querySelector('[name="motivo"]').value,
+      messaggio: form.querySelector('[name="messaggio"]').value
+    };
+
     try {
-      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const res = await fetch('https://formspree.io/f/mbdzrkbn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+      });
       const json = await res.json();
-      if (json.success) {
+
+      if (json.ok) {
         btn.textContent = '✅ Messaggio Inviato!';
         btn.style.background = 'linear-gradient(135deg,#1a7a4a,#0f5c35)';
-        e.target.reset();
+        form.reset();
       } else {
         btn.textContent = '❌ Errore, riprova';
         btn.style.background = 'linear-gradient(135deg,#c0392b,#8b1a1a)';
       }
     } catch(err) {
       btn.textContent = '❌ Errore di rete';
+      btn.style.background = 'linear-gradient(135deg,#c0392b,#8b1a1a)';
     }
+
     setTimeout(() => {
       btn.textContent = 'Invia Richiesta ✉️';
       btn.style.background = '';
       btn.disabled = false;
     }, 3500);
   }
+
 </script>
 </body>
 </html>
