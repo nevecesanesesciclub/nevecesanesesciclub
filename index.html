@@ -384,9 +384,10 @@
           Per informazioni su iscrizioni, quote e prossime uscite, contattaci via email. Il numero di soci è limitato per garantire un'esperienza esclusiva a tutti i membri.
         </p>
       </div>
-      <form name="contatti" method="POST" data-netlify="true" netlify-honeypot="bot-field">
-        <input type="hidden" name="form-name" value="contatti"/>
-        <p style="display:none"><input name="bot-field"/></p>
+      <form id="contactForm" onsubmit="handleSubmit(event)">
+        <input type="hidden" name="access_key" value="mbdzrkbn"/>
+        <input type="hidden" name="subject" value="Nuova richiesta - Neve & Cesanese Sci Club"/>
+        <input type="hidden" name="from_name" value="Neve & Cesanese Sci Club"/>
         <input type="text" placeholder="Nome e Cognome" required/>
         <input type="email" placeholder="La tua Email" required/>
         <input type="tel" placeholder="Numero di Telefono"/>
@@ -434,6 +435,35 @@
       document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});
     });
   });
+
+  // Form Web3Forms
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    const data = new FormData(e.target);
+    btn.textContent = '⏳ Invio in corso...';
+    btn.disabled = true;
+
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: data
+    });
+    const json = await res.json();
+
+    if (json.success) {
+      btn.textContent = '✅ Messaggio Inviato!';
+      btn.style.background = 'linear-gradient(135deg,#1a7a4a,#0f5c35)';
+      e.target.reset();
+    } else {
+      btn.textContent = '❌ Errore, riprova';
+      btn.style.background = 'linear-gradient(135deg,#c0392b,#8b1a1a)';
+    }
+    setTimeout(() => {
+      btn.textContent = 'Invia Richiesta ✉️';
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 3500);
+  }
 </script>
 </body>
 </html>
